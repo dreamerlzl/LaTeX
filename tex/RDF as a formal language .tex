@@ -1,0 +1,407 @@
+\documentclass{article}
+\usepackage{lzl}
+\usepackage{proof}
+\usepackage{hyperref}
+\DeclareMathOperator{\IEXT}{I_{EXT}}
+\DeclareMathOperator{\IL}{I_{L}}
+\DeclareMathOperator{\IS}{I_{S}}
+\DeclareMathOperator{\ICEXT}{I_{CEXT}}
+\DeclareMathOperator{\s}{\phantom{ab}}
+\DeclareMathOperator{\bs}{\phantom{ababab}}
+\newcommand{\deno}[1]{{\texttt{#1}}^{\mathcal{I}}}
+\newcommand{\tri}[3]{#1&#2&#3&.}
+\newcommand{\ttri}[3]{#1 \s #2 \s #3 \s.}
+\newcommand{\ttp}[2]{\texttt{#1:#2}}
+\DeclareMathOperator{\subp}{\ttp{rdfs}{subPropertyOf}}
+\DeclareMathOperator{\subc}{\ttp{rdfs}{subClassOf}}
+\DeclareMathOperator{\class}{\ttp{rdf}{Class}}
+\DeclareMathOperator{\type}{\ttp{rdf}{type}}
+\setlength\parindent{0pt}
+
+\begin{document}
+\textbf{This tex file is based on} \newline
+\url{https://www.w3.org/TR/rdf11-mt/}\newline
+
+ \textbf{Notation}.
+\begin{itemize}
+\item A \textbf{name} is an IRI or literal. 
+\item A \textbf{subgraph} of an RDF graph is a subset of the triples in the graph. 
+\item An \textbf{empty} RDF graph is a empty set of triples.
+\item A \textbf{ground} RDF graph is one that contains no blank nodes.
+\end{itemize}
+
+\section{Syntax}
+Here the syntax means the concrete syntax of RDF rather than an abstract one which can be seen in \newline
+\url{https://www.w3.org/TR/rdf11-concepts/#dfn-blank-node-identifier}
+\newline  There are so currently so many of them(JSON-LD, Turtle, RDFa, RDF/XML, etc.) and may be more in the future, so they are not the topic of this tex file.\newline
+
+ Briefly speaking, the alphabet of RDF is the alphabet of unicode strings, and 
+the sentences(parameter-free formulas) of RDF are triples.
+
+
+\section{Semantics}
+
+In this note, the term \textit{semantics} means a model-theoretic semantics. So the semantics of RDF and RDFS are based on the concept of interpretation, and focus on the truth value of triples and RDF graphs(sets of triples).
+
+Following W3C, and as the book \textit{Foundations of Semantic Web Technologies} says\cite{book}, \newline
+\begin{quotation}
+we start by the comparably easy definition of simple interpretations of graphs. After that, we provide additional criteria which qualify these interpretations as RDF-interpretations. Finally we give further constraints to be fulfilled by an RDF-interpretation in order to be acknowledged as an RDFS-interpretation. As a natural consequence of this approach, every RDFS-interpretation is a valid RDF-interpretation and every RDF-interpretation constitutes a simple interpretation.
+\end{quotation}
+\newpage 
+\subsection{Simple Interpretations}
+
+\begin{defin}(Simple Interpretation)\newline
+A simple Interpretation $\mathcal{I}$ is a mathematical structure consisting of
+\begin{itemize}
+\item $IR$, a non-empty set of resources, which is the domain of $\mathcal{I}$
+\item a set $IP$ called the set of properties of $\mathcal{I}$
+\item a function $\IEXT:IP \mapsto 2^{IR \times IR}$, where $\IEXT(p)$ is called the \textbf{extension} of $p \in IP$
+\item a function $\IS$ from IRIs  into $IR \cup IP$
+\item a partial function $\IL$ from literals into $IR$
+\end{itemize}
+\end{defin}
+
+\textbf{Denotation of Simple Interpretation}.
+\begin{itemize}
+\item For a literal $l$, $l^{\mathcal{I}} = \IL(l)$
+\item For an IRI $r$, $r^{\mathcal{I}} = \IS(r)$
+\item For a ground triple $t = (s,p,o)$, $t^{\mathcal{I}} = $ true iff $p^{\mathcal{I}} \in IP$ and $(s^{\mathcal{I}}, o^{\mathcal{I}}) \in \IEXT(p)$. Otherwise $t^{\mathcal{I}} =  $ false
+\item For a ground graph $G = \{t = (s,p,o)\}$, $G^{\mathcal{I}} = $ true iff $\forall t \in G$, $t^{\mathcal{I}} = $ true. Otherwise $G^{\mathcal{I}} = $ false.
+\end{itemize}
+
+\begin{defin}
+A \textbf{vocabulary} $V$ is a set of names.
+\end{defin}
+
+\begin{defin}
+A literal is called \textbf{ill-typed} for a vocabulary $V$ if its datatype IRI is in $V$ but the lexical form is assigned no value by the lexical-to-value mapping for that datatype.
+\end{defin}
+
+\begin{defin}(Simple $V$-interpretation)
+A simple Interpretation $\mathcal{I}$ of a vocabulary $V$, called a (simple) $V$-interpretation or an interpretation recognizing $V$, is a simple interpretation satisfying 
+\begin{itemize}
+\item if the datatype IRI \texttt{rdf:langString} is in $V$, then for every language-tagged string $E$ with lexical form $s$ and language tag $t$, $E^{\mathcal{I}} = \IL(E) = (s,t')$, where $t'$ is $t$ converted to lower case using US-ASCII rules 
+\item for every other datatype IRI $a\in V$, $a^{\mathcal{I}}$ is the datatype(a resource) identified by $a$. 
+\item for every literal $l$ not ill-typed for $V$ with datatype IRI $a \in V$ and lexical form $s$, suppose the lexical-to-value map is $L2V(a^{\mathcal{I}})$, then $l^{\mathcal{I}} = \IL(l) = L2V(a^{\mathcal{I}})(s)$
+\end{itemize}
+\end{defin}
+ For a ground triple $t = (s,p,o)$, if $o$ is a ill-typed literal for $V$, then $o$ has no denotation and $t^{\mathcal{I}} = $ false. 
+
+\begin{defin}(Satisfiability and Validity)\newline
+For a vocabulary $V$, an RDF graph $G$ is  simply $V-$satisfiable iff for some $V$-interpretation $\mathcal{I}$, $G^{\mathcal{I}} = $ true, and in this case we say $\mathcal{I}$ \textbf{satisfies} $G$. If $G^{\mathcal{I}} = $ true for all $V$-interpretation, then $G$ is called $V-$valid. 
+\end{defin}
+
+\begin{defin}(Simple Entailment)\newline
+For a vocabulary $V$, an RDF graph $G_1$ is said to $V-$entail another RDF graph $G_2$ iff for every $V$-interpretation $\mathcal{I}$, $G_1^{\mathcal{I}} = $ true implies that $G_2^{\mathcal{I}} = $ true, denoted as $G_1 \vDash G_2$.
+\end{defin}
+
+\subsection{RDF Interpretations}
+\begin{defin}(RDF vocabulary)\newline
+The RDF vocabulary, denoted as $V_{RDF}$, is a set containing the following IRIs:\newline
+\texttt{rdf:type rdf:subject rdf:predicate rdf:object rdf:first rdf:rest rdf:value rdf:nil rdf:List rdf:langString rdf:Property rdf:\_1 rdf:\_2 ...}
+\end{defin}
+\begin{defin}
+An RDF interpretation recognizing a vocabulary $V$ which includes \texttt{rdf:langString} and \texttt{xsd:string} is a simple interpretation $\mathcal{I}$ of the vocabulary $V \cup V_{RDF}$ satisfying 
+\begin{itemize}
+\item $p \in IP$ iff $(p,\texttt{rdf:Property}^{\mathcal{I}}) \in \IEXT(\texttt{rdf:type}^{\mathcal{I}})$\,(so $IP \subset IR$)
+\item for every datatype IRI $r \in V$, $x$ is in the value space of the datatype $r^{\mathcal{I}}$ iff $(x,r^{\mathcal{I}}) \in \IEXT(\texttt{rdf:type}^{\mathcal{I}})$
+\item $\mathcal{I}$ satisfies all the triples called \textbf{axiomatic triples} in the following infinite set:\newline\texttt{
+rdf:type rdf:type rdf:Property .\newline
+rdf:subject rdf:type rdf:Property .\newline
+rdf:predicate rdf:type rdf:Property . \newline
+rdf:object rdf:type rdf:Property . \newline
+rdf:first rdf:type rdf:Property . \newline
+rdf:rest rdf:type rdf:Property . \newline
+rdf:value rdf:type rdf:Property . \newline
+rdf:nil rdf:type rdf:List . \newline
+rdf:\_1 rdf:type rdf:Property . \newline
+rdf:\_2 rdf:type rdf:Property . \newline
+\dots}
+\end{itemize}
+\end{defin}
+
+\begin{defin}(RDF Entailment)\newline
+For a vocabulary $V$ which includes \texttt{rdf:langString} and \texttt{xsd:string}, an RDF graph $S$ \textbf{RDF entails} another RDF graph $E$ \textbf{recognizing $V$} iff every RDF interpretation recognizing $V$ which satisfies $S$ also satisfies $E$. When $V = \{\texttt{rdf:langString}, \texttt{xsd:string}\}$, we simply say $S$ \textbf{RDF entails}$E$.
+\end{defin}
+
+\newpage 
+\subsection{RDFS Interpretations}
+\begin{defin}(RDFS Vocabulary)
+The RDFS vocabulary is a set containing the following IRIs:\newline
+\texttt{rdfs:domain rdfs:range rdfs:Resource rdfs:Literal rdfs:Datatype rdfs:Class rdfs:subClassOf rdfs:subPropertyOf rdfs:member rdfs:Container rdfs:ContainerMembershipProperty rdfs:comment rdfs:seeAlso rdfs:isDefinedBy rdfs:label}
+\end{defin}
+
+
+
+\begin{defin}(RDFS Interpretation)\newline
+An RDFS-interpretation of a vocabulary $V$ which includes \texttt{xsd:string} and \texttt{rdf:langString} is an RDF interpretation $\mathcal{I}$ of vocabulary $V \cup V_{RDFS}$ such that 
+\begin{itemize}
+\item there is a function $\ICEXT:IR \mapsto 2^{IR}$ s.t. $\ICEXT(r) = \{x \in IR | (x,r) \in \IEXT(\texttt{rdf:type}^{\mathcal{I}})\},\,\forall r \in IR$. $\ICEXT(r)$ is called the \textbf{class extension} of $r \in IR$. (Based on the first requirement of RDF interpretation, we know that $IP = \ICEXT(\deno{rdf:Property})$)
+
+\item there is a set $IC = \ICEXT(\texttt{rdfs:Class}^{\mathcal{I}})$, i.e. $IC$ is the set of all classes. 
+
+\item $IR = \ICEXT(\texttt{rdfs:Resource}^{\mathcal{I}})$ i.e. every resource has a property type with a value \texttt{rdfs:Resource}.
+\item $LV \triangleq \ICEXT(\texttt{rdfs:Literal}^{\mathcal{I}})$ is the set of all literal values
+\item $\ICEXT(\texttt{rdf:langString}^{\mathcal{I}}) =  \{E^{\mathcal{I}} : E \text{ a language-tagged string} \}$
+
+\item for every datatype IRI $a\in V$, $\ICEXT(a^{\mathcal{I}})$ is the value space of $a^{\mathcal{I}}$ and $a^{\mathcal{I}} \in \ICEXT(\texttt{rdfs:Datatype}^{\mathcal{I}})$
+
+\item if $(x,y) \in \IEXT(\deno{rdfs:domain})$(the domain of property $x$ is $y$) and $(u,v) \in \IEXT(x)$, then $u \in \ICEXT(y)$
+
+\item if $(x,y) \in \IEXT(\deno{rdfs:range})$ and $(u,v) \in \IEXT(x)$ then $v \in \ICEXT(y)$ 
+
+\item $\IEXT(\deno{rdfs:subPropertyOf})$ is transitive and reflexive on $IP$. 
+\item if $(x,y) \in \IEXT(\deno{rdfs:subPropertyOf})$, then $x,y \in IP$ and $\IEXT(x) \subset \IEXT(y)$
+
+\item if $x \in IC$ then $(x,\deno{rdfs:Resource})\in \IEXT(\deno{subClassOf})$. 
+
+\item $\IEXT(\deno{subClassOf})$ is transitive and reflexive on $IC$.
+
+\item if $(x,y) \in \IEXT(\deno{rdfs:subClassOf})$, then $x,y \in IC$ and $\ICEXT(x) \subset \ICEXT(y)$
+
+\item if $x \in \ICEXT(\deno{rdfs:ContainerMemebershipProperty})$, then $(x,\deno{rdfs:member}) \in \IEXT{\deno{rdfs:subPropertyOf}}$
+
+\item if $x \in \ICEXT(\deno{rdfs:Datatype})$ then $(x,\deno{rdfs:Literal}) \in \IEXT(\deno{rdfs:subClassOf})$ 
+
+\end{itemize}
+and $\mathcal{I}$ satisfies all the following RDFS axiomatic triples:\newline\texttt{
+rdf:type rdfs:domain rdfs:Resource . \newline
+rdfs:domain rdfs:domain rdf:Property . \newline
+rdfs:range rdfs:domain rdf:Property . \newline
+rdfs:subPropertyOf rdfs:domain rdf:Property . \newline
+rdfs:subClassOf rdfs:domain rdfs:Class . \newline
+rdf:subject rdfs:domain rdf:Statement . \newline
+rdf:predicate rdfs:domain rdf:Statement . \newline
+rdf:object rdfs:domain rdf:Statement . \newline
+rdfs:member rdfs:domain rdfs:Resource . \newline
+rdf:first rdfs:domain rdf:List . \newline
+rdf:rest rdfs:domain rdf:List . \newline
+rdfs:seeAlso rdfs:domain rdfs:Resource . \newline
+rdfs:isDefinedBy rdfs:domain rdfs:Resource . \newline
+rdfs:comment rdfs:domain rdfs:Resource . \newline
+rdfs:label rdfs:domain rdfs:Resource . \newline
+rdf:value rdfs:domain rdfs:Resource . \newline
+\newline
+rdf:type rdfs:range rdfs:Class . \newline
+rdfs:domain rdfs:range rdfs:Class . \newline
+rdfs:range rdfs:range rdfs:Class .\newline
+rdfs:subPropertyOf rdfs:range rdf:Property .\newline
+rdfs:subClassOf rdfs:range rdfs:Class .\newline
+rdf:subject rdfs:range rdfs:Resource .\newline
+rdf:predicate rdfs:range rdfs:Resource .\newline
+rdf:object rdfs:range rdfs:Resource .\newline
+rdfs:member rdfs:range rdfs:Resource .\newline
+rdf:first rdfs:range rdfs:Resource .\newline
+rdf:rest rdfs:range rdf:List .\newline
+rdfs:seeAlso rdfs:range rdfs:Resource .\newline
+rdfs:isDefinedBy rdfs:range rdfs:Resource .\newline
+rdfs:comment rdfs:range rdfs:Literal .\newline
+rdfs:label rdfs:range rdfs:Literal .\newline
+rdf:value rdfs:range rdfs:Resource . \newline
+\newline
+rdf:Alt rdfs:subClassOf rdfs:Container . \newline
+rdf:Bag rdfs:subClassOf rdfs:Container . \newline
+rdf:Seq rdfs:subClassOf rdfs:Container . \newline
+rdfs:ContainerMembershipProperty rdfs:subClassOf rdf:Property . \newline
+\newline
+rdfs:isDefinedBy rdfs:subPropertyOf rdfs:seeAlso . \newline
+\newline
+rdfs:Datatype rdfs:subClassOf rdfs:Class . \newline
+\newline
+rdf:\_1 rdf:type rdfs:ContainerMembershipProperty . \newline
+rdf:\_1 rdfs:domain rdfs:Resource . \newline
+rdf:\_1 rdfs:range rdfs:Resource . \newline 
+rdf:\_2 rdf:type rdfs:ContainerMembershipProperty . \newline
+rdf:\_2 rdfs:domain rdfs:Resource . \newline
+rdf:\_2 rdfs:range rdfs:Resource .  \newline
+... 
+}
+\end{defin}
+
+ An RDF interpretation of $V \cup V_{RDFS}$ means a simple interpretation of $V \cup V_{RDF} \cup V_{RDFS}$ satisfying the requirements of an RDF interpretation. 
+
+\begin{defin}(RDFS entailment)\newline
+For a vocabulary $V$ which includes \texttt{xsd:string} and \texttt{rdf:langString}, an RDF graph RDFS entails another RDF graph $E$ recognizing $V$ iff every RDFS interpretation recognizing $V$ which satisfies $S$ also satisfies $E$.
+
+\end{defin}
+
+\subsection{Semantics Extension}
+For a simple interpretation $\mathcal{I}$, a set of additional semantic assumptions which makes $\mathcal{I} $ into a simple interpretation recognizing a vocabulary $V$ is called a \textbf{semantic extension} of $\mathcal{I}$. For example, the set of extra semantic requirements for a simple interpretation to be a RDF-interpretation is a semantic extension.\newline
+
+ How can we construct a simple $V-$interpretation for an RDF graph?
+Generally, there are two steps:
+\begin{itemize}
+\item define a simple interpretation for the RDF graph
+\item add the IRIs in $V$ into the set $IP$ and $IR$ correspondingly, redefine $\text{I}_S$(add mappings from IRIs in $V$ to $IR$) and $\IEXT$(add mappings for new elements of $IP$ and meet the semantic extension)
+\end{itemize}
+For example, to construct a RDFS-interpretation for an RDF graph, we do the following:
+\begin{description}
+\item[(1)]define a simple interpretation for the RDF graph
+\item[(2)]add the IRIs in RDF vocabularies $V_{RDF}$ into the set $IP$ and $IR$ correspondingly, redefine $\text{I}_S$ and $\IEXT$
+\item[(3)]again add the IRIs $V_{RDFS}$ into the set $IP$ and $IR$ correspondingly, redefine $\text{I}_S$ and $\IEXT$
+\end{description}
+
+ The semantics listed in previous sections is the \textbf{standard semantics} or \textbf{intensional semantics}, which is a minimal requirement for RDF(S)-compatible system. By a semantic extension of the intensional semantics, the semantics obtained is called a \textbf{extensional semantics}. \newline
+
+ Besides, each semantic extension defines an \textbf{entailment regime}, which specifies:
+\begin{itemize}
+\item A subset of RDF graphs called well-formed for the regime.
+\item An entailment relation between subsets of well-formed graphs and well-formed graphs.
+\end{itemize}
+
+
+\section{Deductive System}
+It seems that W3C doesn't provide an official specification for this section. All of the inference rules for simple, RDF, RDFS and datatype entailments are well introduced in \cite{book}. 
+\subsection{Inference Rules}
+Using the notation
+\begin{itemize}
+\item $s$, any IRI or blank node ID
+\item $p$, any IRI for predicate/property in a triple
+\item $o$, any IRI, blank node ID or literal
+\item $\_:n$, the ID of any blank node
+\item $l$, any literal
+\item $``f"\text{\textasciicircum \textasciicircum }d$, a typed literal with datatype $d$ and lexical form $"f"$.
+\end{itemize}
+
+ the following is a whole list for them:
+\begin{description}
+\item[(1)] simple entailment
+\[\infer[\mathrm{se1}]{s\phantom{ab}p\phantom{ab}\_:n\phantom{ab}.}{s&p&o&.} \]
+\[
+\]
+\[
+\infer[\mathrm{se2}]{\_:n\s p \s o \s.}{s&p&o&.}
+\]
+\item[(2)] RDF entailment 
+\[
+\infer[\mathrm{rdfax}]{s\s p \s o\s .}{}
+\]
+\[\]
+\[\infer[\mathrm{lg}]{s\s p\s \_:n\s.}{s&p&l&.}\]
+\[\]
+\[
+\infer[\mathrm{rdf1}]{p \s \texttt{rdf:type} \s \texttt{rdf:Property}}{s&p&o&.}
+\]
+\[\]
+\[
+\infer[\mathrm{rdf2}]{\_:n \s \texttt{rdf:type}\s \texttt{rdf:XMLLiteral}}{u&a&l&.}
+\]
+\item[(3)] RDFS entailment
+\[
+\infer[\mathrm{rdfsax}]{s\s p \s o\s .}{}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs1}]{\_:n\s \texttt{rdf:type}\s\texttt{rdfs:Literal}\s.}{s & p & l&.}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs2}]{s\s\texttt{rdf:type}\s o'\s.}{p &\texttt{rdfs:domain}& o'&.\bs s&p&o&.}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs3}]{\ttri{s'}{\ttp{rdf}{type}}{o}}{\tri{p}{\ttp{rdfs}{range}}{o}\bs\tri{s}{p}{s'}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs4a}]{\ttri{s}{\ttp{rdf}{type}}{\ttp{rdfs}{Resource}}}{\tri{s}{p}{o}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs4b}]{\ttri{s'}{\ttp{rdf}{type}}{\ttp{rdfs}{Resource}}}{\tri{s}{p}{s'}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs5}]{\ttri{s}{\ttp{rdfs}{subPropertyOf}}{o}}{\tri{s}{\subp}{s'}\bs\tri{s'}{\subp}{o}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs6}]{\ttri{s}{\subp}{s}}{\tri{s}{\ttp{rdf}{type}}{\ttp{rdf}{Property}}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs7}]{\ttri{s}{p_2}{o}}{\tri{p_1}{\subp}{p_2}\bs\tri{s}{p_1}{o}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs8}]{\ttri{s}{\subc}{\ttp{rdfs}{Resource}}}{\tri{s}{\type}{\class}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs9}]{\ttri{s}{\type}{o}}{\tri{s}{\type}{s'}\bs\tri{s'}{\subc}{o}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs10}]{\ttri{s}{\subc}{s}}{\tri{s}{\type}{\ttp{rdfs}{Class}}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs11}]{\ttri{s}{\subc}{o}}{\tri{s}{\subc}{s'}\bs\tri{s'}{\subc}{o}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs12}]{\ttri{s}{\subp}{\ttp{rdfs}{member}}}{\tri{s}{\type}{\ttp{rdfs}{ContainerMembershipProperty}}}
+\]
+\[\]
+\[
+\infer[\mathrm{rdfs13}]{\ttri{s}{\subc}{\ttp{rdfs}{Literal}}}{\tri{s}{\type}{\ttp{rdfs}{Datatype}}}
+\]
+\[\]
+\[
+\infer[\mathrm{gl}]{\ttri{s}{p}{l}}{\tri{s}{p}{\_:n}}
+\]
+here(in gl) $\_:n$ identifies a blank node  introduced by an earlier “weakening” of the literal $l$ via the rule lg.
+\item[(4)] additional rules for datatypes
+\[
+\infer[\mathrm{rdfD1}]{\ttri{\_:n}{\type}{d}}{\tri{d}{\type}{\ttp{rdfs}{Datatype}}\bs\tri{s}{p}{``f"\text{\textasciicircum\textasciicircum} d}}
+\]
+\[\]
+if the value of lexical form $f_1$ in datatype $d_1$ is the same as that of lexical form $f_2$ in datatype $d_2$, 
+\[
+\infer[\mathrm{rdf2}]{\ttri{s}{p}{``f_2"\text{\textasciicircum\textasciicircum}d_2}}
+{\begin{array}{ccll}
+d_1 & \type &  \ttp{rdfs}{Datatype}& .\\
+d_2 & \type & \ttp{rdfs}{Datatype}&.\\
+ &s\s p & ``f_1"\text{\textasciicircum\textasciicircum}d_1 & .
+\end{array}}
+\]
+\[\]
+if the value space of the datatype $d_!$ is contained in the value space of another  datatype $d_2$, 
+\[
+\infer[\mathrm{rdfDAx}]{\ttri{d_1}{\subc}{d_2}}{}
+\]
+\end{description}
+
+\subsection{Comments}
+ some inference rules deserve mentioning:
+\begin{description}
+\item[(1)] for all the inference rules which turn an RDF term into a blank node in the conclusion(like se1, se2, lg), two different RDF terms can not be turned into the same blank node, and the identifier of new blank node must not be used in the input RDF graph. 
+\item[(2)] each axiomatic triple correspond to an axiom(an inference rule without premises) in the deductive system. The collection of axioms in RDF entailment is called rdfax, and that in RDFS entailment is called rdfsax.
+\item[(3)] Simple entailment and RDF entailment are sound and complete:
+\begin{theo}(Soundness and Completeness of simple entailment rules)\newline
+A graph $G_1$ simply entails a graph $G_2$, iff $G_1$ can be extended to a graph $G'_1$ such that $G_2 \subseteq G'_1$ by applying the inference rules se1 and se2. 
+\end{theo}
+here "extend" means $G_1 \subseteq G'_1$ and $G_1 \vdash (G'_1 - G_1)$
+\begin{theo}(Soundness and Completeness of RDF entailment rules)\newline
+A graph $G_1$ RDF entails a graph $G_2$ iff there is a graph $G'_1$ that can be derived from $G_1$ by applying the inference rules lg, rdf1, rdf2, as well as rdfax such that $G'_1$ simply entails $G_2$.
+\end{theo}
+here "derive" means $G_1 \vdash_{RDF} G'_1$
+\item[(4)] RDFS entailment is sound but not complete. An RDF graph is said to have an \textbf{XML clash} if there is an ill-typed literal in the graph, and we have the following theorem:
+\begin{theo}(Soundness of RDFS entailment)\newline
+A graph $G_2$ is RDFS entailed by $G_1$, if there is a graph $G'_1$ obtained by applying the rules lg, gl, rdfax, rdf1, rdf2, rdfs1 – rdfs13 and rdfsax to $G_1$, such that
+\begin{itemize}
+\item $G_2$ is simply entailed by $G'_1$, or 
+\item $G'_1$ contains an XML clash
+\end{itemize}
+\end{theo} 
+\item[(5)]External datatypes may be introduced by new vocabularies; however, it is impossible to completely characterize their semantic behavior only by RDFS-internal means(additional deduction rules may need to add). Still, it is possible to state how frequently occurring interdependencies related to datatypes should be expressed by deduction rules: they are rdfD1, rdfD2, and rdfDAx. Note that the preconditions for these rules are not just syntactical, but also semantical(like rdfD2 and rdfDAx).
+\end{description}
+
+
+\begin{thebibliography}{99}
+\bibitem{book}
+Hitzler, Pascal, Markus Krotzsch, and Sebastian Rudolph. \textit{Foundations of semantic web technologies}. Chapman and Hall/CRC, 2009.
+\bibitem{slide}
+Werner, Nutt.``Semantic Technologies Part 9:RDF(S) Semantics''. Semantic Technologies, Free University of Bozen-Bolzano. Fall/Winter, 2014/2015. Course handout.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,239 @@
+\documentclass{article}
+\usepackage{lzl}
+\usepackage{proof}
+
+\setlength\parindent{0pt}
+
+\begin{document}
+
+\begin{pro}
+For a finite set of sentences KB and a sentences $\alpha$, KB $\vDash \alpha$
+iff $\vDash \text{KB}\to \alpha$ iff KB $\cup \{\alpha\}$ is unsatisfiable iff KB $\cup \{\alpha\} \nvDash \bot$. Here $\alpha$ is also called a \textbf{query}.
+\end{pro}
+\noindent As shown in this proposition, we can check an entailment via a check of unsatisfiability, which can be done by a single inference rule called resolution(though check for satisfiability is NP-complete).
+
+\begin{defin}
+A literal is an atomic formula or the negation of an atomic formula. A clause is a disjunction of literals.
+\end{defin}
+\noindent Since the definition of atomic formulas differs from propositional logic to first order logic, the definition of literals and clauses also varies.
+
+\begin{defin}(Conjunctive Normal Form, CNF)\newline
+A  formula is said to be in conjunctive normal form iff it's a conjuncture of clauses. Such formulas are also called CNFs.
+\end{defin}
+\noindent Note that a CNF in first order logic may have free variables and thus is not a sentence.
+
+\section{PROPOSITIONAL CASE}
+\subsection{Preliminaries}
+
+\begin{pro}
+Every propositional formula is logically equivalent to a CNF.
+\end{pro}
+\begin{proof}
+Note that 
+\[
+\bigvee_{j=1}^n(l_{j,1} \wedge l_{j,2} \wedge \dots \wedge l_{j,a_j}) \equiv \bigwedge_{i_1,i_2,\dots,i_n}\,\bigvee_{j=1}^n l_{j,i_j}
+\]
+Use the structural induction($\{\neg, \vee, \wedge\}$ is complete):\newline
+base case: Any atom is a literal and thus a CNF \newline
+inductive case: suppose $p = c_1 \wedge c_2 \wedge \dots \wedge c_n,q$ are two CNFs, then
+$p \wedge q$ and $p \vee q$ are CNFs, and by moving $\neg$ inward,
+\[
+\neg p \equiv \bigvee_{j=1}^n(\neg l_{j,1} \wedge \neg l_{j,2} \wedge \dots \neg \wedge l_{j,a_j}) \equiv \bigwedge_{i_1,i_2,\dots,i_n}\,\bigvee_{j=1}^n \neg l_{j,i_j}
+\] is a CNF. 
+\end{proof}
+
+
+\begin{defin}(Clausal Form)\newline
+The clausal form of a CNF is a notation where a clause is represented as a set of literals occurring in it surrounded by square brackets $[]$(so identical literals will be reduced to only one; this process is called \textbf{factoring}). An empty $[]$, called an empty clause, is used to represent a contradiction. \newline
+\noindent The clausal form of a set of clauses or a CNF is a set of the clausal forms of each clause(Note that a CNF can actually be viewed as a set of clauses). An empty $\{\}$ is used to present an empty set of clauses; i.e. a tautology.
+\end{defin}
+
+\noindent For example, the clausal form of the clause $x\vee f(a)$ is $[x,f(a)]$, and the clausal form  
+of a CNF $(x \vee f(a)) \wedge (\neg y \vee g(b))$ is $\{[x,f(a)],[\neg y,g(b)]\}$.
+
+\subsection{Resolution}
+
+\begin{defin}(Resolution for Propositional Logic)\newline
+For two clauses $c_1,c_2$ and a literal $\rho$,
+\[
+\{c_1 \vee \rho, c_2 \vee \neg \rho\}\vDash c_1 \vee c_2
+\]
+or in clausal form
+\[
+\{c_1 \cup \{\rho\}, c_2 \cup \{\neg \rho\}\} \vDash c_1 \cup c_2
+\]
+where $c_1\vee c_2$ is called a \textbf{resolvent} of the two input clauses $c_1,c_2$.
+\end{defin}
+\noindent Note. In this section, the symbol $\vdash$ means  a deduction only using the resolution rule. \newline
+
+\begin{defin}(Resolution Closure)\newline
+The resolution closure  of a set of clauses $S$, denoted as $RC(S)$,  is the set of all clauses derivable by repeated application of the resolution rule to clauses in  or their derivatives. 
+\end{defin}
+
+
+\noindent \textbf{Properties}.
+\begin{description}
+\item[(1)] Any two of the input clauses and resolvent determine the rest element.
+\item[(2)] Resolution is refutation-sound and refutation-complete; i.e. For a set of clauses $S$ where there are only finitely many distinct atoms, $S\vDash []$ iff $S\vdash[]$. An informal proof of this can be seen in \cite{proof}.
+\item[(3)] For a set of clauses $S$ with only finitely many symbols, checking $S\vdash []$ is of finite steps: each clause added to the set is a resolvent of previous clauses, and so contains only literals mentioned in the original set S. There are only finitely many clauses with just these literals.
+\end{description}
+
+
+\noindent To use resolution for logical entailment in KB, we first need to convert KB to CNF once and when we want to add new facts to KB, we add clauses in it without affecting others. In this way, the KB is more extensible and easier to manipulate. 
+
+\section{FIRST ORDER LOGIC CASE}
+In this note, constants in first order logic are viewed as 0-ary functions. 
+\subsection{Preliminaries}
+As we can see in the propositional case, the premises of resolution rule are two CNFs.  But in first order logic, quantifiers are introduced, and things become more complex: the general resolution is applied for the so-called PCNFs with only universal quantifiers.\newline
+
+\begin{defin}(Prenex Conjunctive Normal Form, PCNF)\newline
+A first order logic formula is in prenex conjunctive normal form(PCNF) iff it's of the form
+\[
+Q_1x_1 \dots Q_n x_n M
+\]
+where the $Q_i$ are quantifiers and $M$ is a quantifier-free formula in CNF. The sequence $Q_1x_1 \dots  Q_nx_n$ is called the \textbf{prefix} and $M$ is called the \textbf{matrix}.
+\end{defin}
+
+\noindent The clausal form of a PCNF  with only universal quantifiers and a matrix $M$ is a set of clausal forms of the clauses of $M$; e.g. the clausal form of 
+\[
+\forall y \forall z([f(y) \lor z] \wedge [\neg y \vee g(z)])
+\]
+is $\{[f(y),z],[\neg y,g(z)]\}$. Thus, \textbf{a set of clauses is implicitly universally quantified}. 
+
+\begin{theo}(Skolem)\newline
+Let $A$ be a closed formula of FOL. Then there exists a PCNF $A'$ s.t. $A$ is satisfiable iff $A'$ is satisfiable.
+\end{theo}
+\noindent Therefore, for a set of clauses $S$(like $KB \cup \{\neg \alpha\}$), to check the satisfiability of $S$ is converted to check the satisfiability of the PCNF of $S$. \newline
+
+Algorithms that transform $A$ into $A'$ can be found on chapter 9 of \cite{example}. A basic one containing the following steps:
+\begin{itemize}
+\item Rename bound variables so that no variable appears in two quantifiers.
+\item Eliminate all binary Boolean operators other than $\vee$ and $\wedge$.
+\item push $\neg$ inward, collapsing multiple negations, until they apply to atomic formulas only. 
+\item Extract quantifiers from the matrix. Always choose an outermost quantifier first.
+\item Use the distributive laws to transform the matrix into CNF. The formula is now
+in PCNF.
+\item a process called \textit{Skolemization}, which eliminates existential quantifiers by introducing new function symbols called \textit{Skolem functions}. 
+\end{itemize}
+Finally, the formula can be written in clausal form by dropping the (universal)quantifiers and writing the matrix as sets of clauses.\newline
+
+To better illustrate the resolution, we need the concept of substitution:
+
+\begin{defin}(Substitution)\newline
+A substituion of terms for variables is a set:
+\[
+\{ x_1 \leftarrow t_1,\dots,x_n \leftarrow t_n\}
+\]
+where each $x_i$ is a distinct variable and each $t_i$ is an arbitrary term. The empty substitution is the empty set. 
+\end{defin}
+
+\begin{defin}(Substitution Instance)\newline
+An expression is a term, a literal, a clause or a set of clauses. Let $E$  be an expression and let $\theta$ be a substitution. An instance $E\theta$ of $E$ is obtained by \textit{simultaneously} replacing each ocurrence of $x_i$ in $E$ by $t_i$.
+\end{defin}
+
+\noindent Also note that for two terms $t_1$ and $t_2$ and a substitution $\theta$, the following formulas are valid:
+\begin{align*}
+&(\neg t_1)\theta = \neg(t_1\theta)\\
+&(t_1 \wedge t_2)\theta = t_1\theta \wedge t_2\theta\\
+&(t_1 \vee t_2)\theta = t_1\theta \vee t_2\theta\\
+&(t_1 \to t_2)\theta = (t_1\theta) \to (t_2)\theta
+\end{align*}
+\noindent So it still makes sense to use the ``ambiguous" notation like $\neg t_1 \theta$(the priority of substitution or negation doesn't matter).\newline
+
+\noindent \textbf{Example}. (p187 of \cite{example})\newline
+Consider the expression $E = [p(x), q(f(y))]$ and a substitution $\theta = \{x \leftarrow y, y \leftarrow f(a)\}$, the instance obtained by performing the substitution is:
+\[
+E\theta = \{p(y), q(f(f(a)))\}
+\]
+The word \textit{simultaneously} in the above definition means that one does not substitute y for
+ $x$ in $E$ to obtain:
+ \[
+ \{p(y), q(f(y))\}
+ \]
+ and then substitute $f(a)$ for $y$ to obtain:
+ \[
+ \{p(f(a)),q(f(f(a)))\}
+ \]
+
+\begin{defin}(Unifier)\newline
+For a set of literals $\{\rho_1,\rho_2,\dots,\rho_n\}$, a unifier $\theta$ is a substitution s.t. 
+\[
+\rho_1\theta = \rho_2\theta = \dots = \rho_n\theta
+\]
+is valid.
+\end{defin}
+
+\subsection{Resolution}
+\noindent we have the following so-called general resolution:
+\begin{theo}(General resolution)\newline
+Let $c_1$, $c_2$ be clauses with no variables in common. Suppose $L_1 = \{\rho_1,\rho_2,\dots,\rho_m\} \subset c_1$ and $L_2 = \{\sigma_1,\sigma_2,\dots,\sigma_n\} \subset c_2$ be subsets of literals such that $L_1\theta = L_2^c \theta = \{\neg\sigma_1,\dots,\neg \sigma_n\}\theta$ is valid for a unifier $\theta = \{x_i \leftarrow t_i\,(i = 1,2,\dots,d)\}$. Then the clause $(c_1 \cup c_2)\theta$ can be inferred; to express this in terms of first order formulas, resolution is a rule of inference such that
+\[
+\infer{\forall_3(\{c_1 \vee c_2\}\theta)}{\{\forall_1(c_1 \vee \rho_1 \vee \dots \vee \rho_m), \forall_2(c_2 \vee \sigma_1 \vee \dots \vee \sigma_m)\}}
+\]
+$\forall_1$, $\forall_2$, $\forall_3$ are sequences of universal quantifiers, where $\forall_3$ involves all the remaining variables in $(c_1 \vee c_2)\theta$. 
+\end{theo}
+Though two sets of literals are considered in the general description of resolution, two literals are commonly used in practice. Some examples can be seen in p58 of \cite{example2}.\newline
+
+\textbf{Properties}.
+\begin{description}
+\item[(1)] Even for a set of clauses with finite symbols, the first order resolution procedure might not terminate; for example, suppose $P$ is a unary predicate, $f$ a function symbol, $a$ a constant, and consider $S = \{[P(f(x)),\neg P(x)],[P(a)]\}$. Currently there is no general way to detect all such infinite branches. 
+\item[(2)] first order resolution is also refutation-complete and refutation-sound.
+\end{description}
+
+\section{RESOLUTION INTRACTABILITY}
+\begin{defin}(Resolution Derivation)\newline
+A Resolution derivation of a clause $c$ from a set of clauses$ $S is a sequence of clauses $c_1, \dots, c_n$, where the last clause, $c_n$, is $c$, and where each $c_i$ is either an element of $S$ or a resolvent of two earlier clauses in the derivation. 
+\end{defin}
+
+Even for propositional case, Armin Haken has proved that there are unsatisfiable propositional clauses $c_1,\dots,c_n$ such that the shortest derivation of the empty clause has on the order of $2^n$ steps. 
+
+\subsection{Most General Unifiers}
+The most important way of avoiding needless search in a first-order derivation is to keep the search as general as possible. For example, consider two PCNF formulas $\forall x (P(f(x)) \vee c_1(x))$ and $\forall y \neg P(y)$($P$ is a predicate and $f$ is a function). The literals $P(f(x))$ and $P(y)$ can be unified either by  
+\[
+\theta_1 = \{x \leftarrow a, y \leftarrow f(a)\}
+\]
+or
+\[
+\theta_2 = \{y \leftarrow f(x)\}
+\]($a$ is a constant)\newline
+But their resolvent is different; the resolvent for $\theta_1$ is $c_1(a)$, for $\theta_2$ is $\forall xc_1(x)$.  Now if the KB $= \{\forall x (P(f(x)) \vee c_1(x))\}$ and the query is $c_1(b) \vee \exists y P(y)$($b$ is another constant), we can obtain the empty clause with one more resolution using $\theta_2$, but not for $\theta_1$. Actually, when a stupid algorithm finds that $\theta_1$ doesn't work, it may try another substitutions with a different constant, which will never work either. The problem is that these substitutions are too specific.
+
+\begin{defin}(Composition of Substitutions)\newline
+Let 
+\begin{align*}
+\theta = \{x_1 \leftarrow t_1,\dots,x_n \leftarrow t_n\}\\
+\sigma = \{y_1 \leftarrow s_1, \dots, y_k \leftarrow s_k\}
+\end{align*}
+be two substitutions and let $X = \{x_1,\dots,x_n\}$ and $Y = \{y_1,\dots,y_k\}$ be the sets of variables substituted for in $\theta$ and $\sigma$ , respectively. The composition of $\theta$ and $\sigma$, $\theta\sigma$, is a substitution such that
+\[
+\theta\sigma = \{x_i \leftarrow t_i\sigma\,|\,x_i \in X\} \cup \{y_j \leftarrow s_j\,|\,y_j \in Y, y_j \notin X\}
+\]
+\end{defin}
+
+\begin{defin}(Most General Unifier)\newline
+For a set of literals $L$, a most general unifier(MGU) for $L$ is a unifier $\mu$ such that any unifier $\theta$ of $L$ can be expressed as 
+\[
+\theta = \mu\lambda
+\]
+for some substitution $\lambda$.
+\end{defin}
+The key fact is that we can limit the resolution rule to MGUs without loss of refutation completeness. And there are linear time algorithms for calculating an MGU. A simple algorithm called the Robinson's unification algorithm which takes exponential time to calculate an MGU for two literals $\rho_1,\rho_2$ is presented below(p72 of \cite{example2}):\newline
+
+(Robinson's unification algorithm)
+\begin{description}
+\item[(1)] start with $\theta = \{\}$;
+\item[(2)] exit if $\rho_1 \theta = \rho_2 \theta$;
+\item[(3)] calculate the disagreement set $DS$, the pair of terms at the first place where $\rho_1\theta$ and $\rho_2\theta$ disagree; (e.g. if $\rho_1\theta = P(a, f(g(z),\dots))$ and $\rho_2\theta = P(a, f(u)\dots)$, then $DS = (u,g(z))$)
+\item[(4)]if $DS$ exactly contains a variable $v$ and a term $t$ not containing $v$, then set $\theta$ to $\theta\{v \leftarrow t\}$, and go to step 2; otherwise, fail.
+\end{description}
+
+
+\begin{thebibliography}{99}
+\bibitem{proof}
+Russell, Stuart J., and Peter Norvig. \textit{Artificial intelligence: a modern approach.} Malaysia; Pearson Education Limited,, 2016. p256
+\bibitem{example}
+Ben-Ari, Mordechai. \textit{Mathematical logic for computer science.} Springer Science \& Business Media, 2012.
+\bibitem{example2}
+Levesque, Hector J., and Ronald, Brachman J.. \textit{Knowledge representation and reasoning.} Elsevier, 2004.
+\end{thebibliography}
+\end{document}

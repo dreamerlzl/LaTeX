@@ -1,0 +1,72 @@
+\ProvidesPackage{lzl}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{yhmath}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{listings}
+\lstset{
+language = SQL,
+escapeinside={||},
+mathescape,
+columns=fullflexible
+}
+
+\theoremstyle{definition}
+\newtheorem*{nota}{Notation}
+\newtheorem*{theo}{Theorem}
+\newtheorem*{cor}{Corollary}
+\newtheorem*{defin}{Definition}
+\newtheorem*{lemma}{Lemma}
+\newtheorem*{pro}{Proposition}
+\newtheorem*{eg}{Example}
+
+\DeclareMathOperator{\Q}{\mathbb{Q}}
+\DeclareMathOperator{\R}{\mathbb{R}}
+\DeclareMathOperator{\Z}{\mathbb{Z}}
+\DeclareMathOperator{\N}{\mathbb{N}}
+\DeclareMathOperator{\X}{\mathcal{X}}
+\DeclareMathOperator{\Y}{\mathcal{Y}}
+\DeclareMathOperator{\lcm}{lcm}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\var}{Var}
+\DeclareMathOperator{\cond}{cond}
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\tr}{tr}
+
+\newcommand{\ip}[2]{\left\langle #1,#2 \right\rangle}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\vp}{\varepsilon}
+\newcommand{\z}{z^{*}}
+\newcommand{\p}{\Phi}
+\newcommand{\pd}{\partial}
+\newcommand{\ba}{\begin{align*}}
+\newcommand{\ea}{\end{align*}}
+\newcommand{\td}{\nabla}
+\newcommand{\epa}{a^{*}}
+\newcommand{\tf}{\usefont{T1}{cmr}{bx}{sl}}
+\newcommand{\f}{f^{'}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\ff}{f^{''}}
+\newcommand{\fff}{f^{'''}}
+\newcommand{\GG}{G^{*}}
+\newcommand{\h}{h^{*}}
+\newcommand{\x}{x^{*}}
+\newcommand{\pp}{P^{*}}
+\newcommand{\rr}{r^{*}}
+\newcommand{\dg}{\Delta g}
+\newcommand{\dx}{\Delta x}
+\newcommand{\lm}{\lambda}
+\newcommand{\ov}{\overline}
+\newcommand{\ve}{\text{vec\,}}
+\newcommand{\vs}{\varepsilon}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\mG}{\mathcal{G}}
+\newcommand{\tss}{\textsuperscript}
+
+\newcommand{\cov}{\text{Cov} }
+\newcommand{\widesim}[2][1.5]{
+  \mathrel{\overset{#2}{\scalebox{#1}[1]{$\sim$}}}
+}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}

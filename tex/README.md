@@ -3,5 +3,5 @@ To typeset the tex file in this directory, please first download the lzl.sty, wh
 
 # Content Preview
 * rdf_formal_semantics: The formal semantics of RDF by viewing it as a formal language
-* dl_intro: introduction to the basics of description logic, which is the underlying logic of the OWL2
+* dl_intro: introduction to the basics of description logic, which is the foundation of the underlying logic of the OWL2
 

@@ -1,0 +1,294 @@
+\documentclass{article}
+\usepackage{lzl}
+\usepackage{hyperref}
+\DeclareMathOperator{\al}{\mathcal{AL}}
+\DeclareMathOperator{\fl}{\mathcal{FL}}
+\DeclareMathOperator{\el}{\mathcal{EL}}
+\DeclareMathOperator{\deno}{\mathcal{I}}
+\DeclareMathOperator{\dm}{\Delta^{\deno}}
+\DeclareMathOperator{\kb}{\mathcal{K}}
+\DeclareMathOperator{\tbox}{\mathcal{T}}
+\DeclareMathOperator{\abox}{\mathcal{A}}
+\DeclareMathOperator{\rbox}{\mathcal{R}}
+\DeclareMathOperator{\tran}{\textsf{Tran}}
+\DeclareMathOperator{\func}{\textsf{Func}}
+
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\makeatletter
+\providecommand*{\Dashv}{%
+  \mathrel{%
+    \mathpalette\@Dashv\vDash
+  }%
+}
+\newcommand*{\@Dashv}[2]{%
+  \reflectbox{$\m@th#1#2$}%
+}
+\makeatother
+
+\begin{document}
+
+\textbf{Conventions}. ``w.r.t." = with respect to, ``i.e." = in other words, ``e.g." = for example.
+
+\section{Introduction}
+\subsection{Overview}
+\begin{defin}(Description Logic, DL)\newline
+Description logics are a family of formal languages designed for knowledge representation and reasoning, and most of these are decidable fragments of FOL.
+\end{defin}
+DLs are more expressive than propositional logic but less expressive than first-order logic.
+There are general, spatial, temporal, spatiotemporal, and fuzzy descriptions logics, and each description logic features a different balance between DL expressivity and reasoning complexity by supporting different sets of mathematical constructors.\newline
+
+In DLs, constant symbols are called \textbf{individuals}, unary relation symbols are called \textbf{concepts}, and binary relation symbols are called \textbf{roles}.
+Most description logic starts with one of the following basic description logic:
+\begin{itemize}
+\item $\al$, called the attributive language
+\item $\fl$, called the frame based description language
+\item $\el$, called the existential language
+\end{itemize}
+Followed by any of the semantic extensions labelled by a letter, part of which are listed in wiki:\newline
+
+{\url{https://en.wikipedia.org/wiki/Description_logic#Naming_convention}} \newline
+
+There do exist some canonical DLs  which don't exactly fit this convention. Some of them can also be viewed in the above link.
+
+\subsection{Components of a DL}
+\begin{description}
+\item[syntax] including
+\begin{itemize}
+\item alphabet: operators plus logical connectives(logical symbols) and a signature/vocabulary(non-logical symbols plus their arities)
+\item terms: concept descriptions and role expressions
+\item well-formed formula: assertions(ABox) and axioms(TBox and RBox)
+\end{itemize}
+\item[semantics] using the model-theoretic semantics, including a domain and an interpretation function 
+\end{description}
+A set of well-formed formulas of a DL is called a \textbf{knowledge base} or an \textbf{ontology}\cite{primer}.
+
+\section{$\mathcal{AL}$ and its family}
+This section is based on \cite{al}.
+\subsection{Syntax}
+The alphabet includes:
+\begin{itemize}
+\item operators : $\{ \neg ,\sqcap, \top, \bot\}$
+\item logical connectives: $\{\forall, \exists, \sqsubseteq, \equiv\}$
+\item signature : there are 3 sets of symbols, $N_C$(concept names, unary predicate symbols), $N_R$(role names, binary predicate symbols) and $N_I$(individual names, constants). Each element of $N_C$ is called an \textbf{atomic concept}. \newline
+\end{itemize}
+
+\begin{defin}(Concept Description/Complex Concept)\newline
+A concept description, or simply concept, in $\al$ is one of the following form:
+\begin{itemize}
+\item $A \in N_C$
+\item $\neg A$, $A \in N_C$\,({atomic negation})
+\item $\top$\,(universal concept or top concept)
+\item $\bot$\,(bottom concept)
+\item $C \sqcap D$, where $C,D$ are concept descriptions
+\item $\forall R.C$\,(value restriction, like \texttt{owl:allValuesFrom}), $R \in N_R$ and $C$ is a concept description
+\item $\exists R.\top$\,(limited existential quantification), $R \in N_R$
+\end{itemize}
+\end{defin}
+
+\begin{defin}(Well-Formed Formulas of $\al$)
+\begin{itemize}
+\item ABox assertions: of the form $C(a)$(concept assertions) and $R(a,b)$(role assertions), where $C$ is a concept, $R \in N_R$ and $a,b \in N_I$. A finite set of  ABox assertions is called an ABox/world description.
+\item TBox/terminological axioms: they are of the form $C \sqsubseteq D$ or $C \equiv D$,
+where $C, D$ are concepts. Axioms of the first form are called \textbf{class inclusions}, and axioms of the second form are called \textbf{class equalities}. An equality whose left-hand side is an atomic concept is called a \textbf{definition}, which are used to introduce symbolic names for complex concept descriptions. 
+\end{itemize}
+\end{defin}
+
+\begin{defin}(TBox)\newline
+A set of terminological axioms is called a TBox/T-Box.
+\end{defin}
+TBox serves as a schema, and ABox describes a concrete situation.
+
+\subsection{Model-Theoretic Semantics}
+\begin{defin}(Semantics for $\al$)\newline
+An interpretation $\deno$ of $\al$ consists of a domain $\Delta^{\deno}$ and an interpretation function $.^{\deno}$ that maps every individual $a \in N_I$ to an element $a^{\deno} \in \dm$, every concept $A\in N_C$ to a subset $A^{\deno} \subset \Delta^{\deno}$ and every role $R\in N_R$ to a subset $R^{\deno}\subseteq\Delta^{\deno}\times\Delta^{\deno}$, such that(here $.^{\deno}=$ means the interpretation of left concept is the set on the right)
+\begin{align*}
+\top^{\deno} &= \Delta^{\deno}\\
+\bot^{\deno} &= \varnothing\\
+(\neg A)^{\deno} &= \Delta^{\deno}\backslash A^{\deno}\\
+(C \sqcap D)^{\deno} &= C^{\deno} \cap D^{\deno}\\
+(\forall R.C)^{\deno} &= \{ x\in \dm | \text{ For any }y\in \dm, \text{ if }(x,y) \in R^{\deno}, \text{ then } y\in C^{\deno}\}\\
+(\exists R.\top)^{\deno} &= \{x \in \dm | \text{ There is some }y\in\dm \text{ such that }(x,y) \in R^{\deno}\}
+\end{align*}
+And 
+\begin{itemize}
+\item $\deno$ satisfies an ABox assertion $C(a)$, or $C(a)$ is true under $\deno$ iff $a^{\deno} \in C^{\deno}$, denoted as $\deno \vDash C(a)$; $\deno$ satisfies $R(a,b)$ iff $(a^{\deno},b^{\deno}) \in R^{\deno}$, denoted as $\deno \vDash R(a,b)$
+\item $\deno$ satisfies a TBox axiom $C \sqsubseteq D$, or $C \sqsubseteq D$ is true under $\deno$, iff $C^{\deno} \subseteq D^{\deno}$, denoted as $\deno \vDash C \sqsubseteq D$.  $\deno$ satisfies $C \equiv D$ iff $C^{\deno} = D^{\deno}$.
+\end{itemize}
+If an interpretation $\deno$ satisfies a set of formula $\Sigma$($\deno$ satisfies each element of $\Sigma$, which is either a TBox axiom or an ABox assertion), then $\deno$ is also called a model of $\Sigma$.
+\end{defin}
+
+\subsection{Extensions of $\al$}
+
+\textbf{General complement}(indicated by the letter $\mathcal{C}$)\newline
+The negation of any concept is added, and interpreted as 
+\[
+(\neg C)^{\deno} = \dm \backslash C^{\deno}
+\]
+
+\textbf{Union of concepts}(indicated by the letter $\mathcal{U}$)\newline
+A new kind of concept description $C \sqcup D$\,($C,D$ are concepts) is added, and interpreted as 
+\[
+(C \sqcup D)^{\deno} = C^{\deno} \cup D^{\deno}
+\]
+
+\textbf{Full existential quantification}(indicated by the letter $\mathcal{E}$)\newline
+A new kind of concept description $\exists R.C\,(R \in N_R, C \in N_C)$ is added, and interpreted as
+\[
+(\exists R.C)^{\deno} = \{a \in \dm | \text{There is some }b \in C^{\deno}, (a,b) \in R^{\deno}\}
+\]
+This extension corresponds to \texttt{owl:someValuesFrom} in OWL.\newline
+
+\textbf{Number restrictions}(indicated by the letter $\mathcal{N}$)\newline
+Two new kinds of concept description $\leqslant n\,R$ and $\geqslant n\,R\,(R \in N_R, n \in \mathbb{N})$ are introduced, and interpreted as($\#$ is used to denote the cardinality of a set)
+\begin{align*}
+(\geqslant n\,R)^{\deno} &= \{a \in \dm | \#\{b \in \dm | (a,b) \in R^{\deno}\} \ge n\}\\
+(\leqslant n\,R)^{\deno} &= \{a \in \dm |  \#\{b \in \dm | (a,b) \in R^{\deno}\} \le n\}
+\end{align*}
+This extension corresponds to \texttt{owl:maxCardinality} and \texttt{owl:minCardinality}. \newline
+
+\textbf{Qualified Number Restriction}(indicated by the letter $\mathcal{Q}$)\newline
+Two new kinds of concept $\leqslant n \,R.C$ and $\geqslant n\,R.C\,(n \in \mathbb{N}, R\in N_R, C \text{ a concept})$ are included, and interpreted as 
+\[
+(\geqslant n\,R.C)^{\deno} = \{ a \in \dm | \#\{b \in C^{\deno} | (a,b) \in R^{\deno}\} \ge n\}
+\]
+
+\textbf{Object Role transitivity}(not indicated by a letter; $\mathcal{ALC}$ plus this extension is denoted as $\mathcal{S}$)\newline
+A new kind of axiom $\tran(R)\,(R \in N_R)$ is added(and thus the operator $\tran$ is added into the alphabet), and 
+\[
+\deno \vDash \tran(R) \text{ iff } R^{\deno} = \left(R^{\deno}\right)^{+}
+\]
+here $\phantom{a}^{+}$ denotes the transitive closure. \newline
+
+\textbf{Role Hierarchy}(indicated by the letter $\mathcal{H}$)\newline
+Formulas like $R \sqsubseteq S\,(R,S \in N_R)$ are included, and $\deno \vDash R \sqsubseteq S$ iff $R^{\deno} \subseteq S^{\deno}$.\newline
+
+\textbf{Role Constructors}(indicated by the letter $\mathcal{R}$)\newline
+This is also known as limited complex role inclusion axioms. 
+\begin{itemize}
+\item there is a special role name $U \in N_R$ called the \textbf{universal role} which relates all pairs of individuals; i.e. $U^{\deno} = \dm \times \dm$.
+\item a new kind of terms called \textbf{role expression} is added, of which the definition varies considering the constructors involved. 
+\item new forms of formulas called role axioms are added, used to declare characteristics of a role or disjointness of two roles. A finite set of such formulas is called a \textbf{RBox}. 
+\item for decidability purpose, there is a subset of role expressions called \textbf{safe} role expressions.
+\end{itemize}
+As shown above, $\mathcal{R}$ encompasses $\mathcal{H}$ and role transitivity. For details of this part, see chapter 3 and 5 of \cite{rbox}.\newline
+
+\textbf{Nominals}(indicated by the letter $\mathcal{O}$)\newline
+In this extension, special atomic concepts $A_a$ are added, each of which forms a concept, called a \textbf{nominal}, and interprted as the set of a instance it names, i.e., $A_a^{\deno} = \{a \in \dm\}$(sometimes also written as $\{o\}^{\deno} = \{o^{\deno}\},\,o \in N_I$). With the presence of $\mathcal{U}$, a closed class(enumerated class) can be expressed as a union of nominals:
+\[
+\{a_1\} \sqcup \dots \sqcup \{a_n\},\,a_1,\dots,a_n \in \dm
+\]
+Also note that with $\mathcal{N}$, we can express individuals are different from each other:\[
+\{a_1\} \sqcap \dots \sqcap \{a_n\} \sqsubseteq \bot
+\]
+
+\textbf{Inverse role}(indicated by the letter ${\mathcal{I}}$)\newline
+New terms of the form $R^{-}\,(R \in N_R)$ are added, and interpreted as 
+\[
+(R^{-})^{\deno} = \{(b,a) | (a,b) \in R^{\deno}\}
+\]
+
+\textbf{Concrete Domain/Datatype}(indicated by the letter $(\mathbf{D})$ or $\phantom{a}^{(\mathcal{D})}$)\newline
+As state in \cite{domain},
+\begin{quotation}
+Concrete domains integrate DLs with concrete sets such as the real numbers,
+integers, or strings, as well as concrete predicates defined on these sets, such as numerical
+comparisons (e.g., $\le$), string comparisons (e.g., isPrefixOf), or comparisons with constants(e.g., $\le$17).
+\end{quotation}
+
+\textbf{Role Functionality}(indicated by the letter $\mathcal{F}$)\newline
+with this extension, a role can be stated to be functional $\func(R)$ as an axiom. However, this can also be done via $\mathcal{N}$:
+\[
+\top \sqsubseteq\,\leqslant1R
+\]
+
+Extending $\al$ by any subset of the above constructors yields a particular $\al$-language.
+We name each $\al$-language by a string of the form
+\[
+\al[\mathcal{U}][\mathcal{E}][\mathcal{N}][\mathcal{C}]\dots
+\]
+where a letter in the name stands for the presence of the corresponding constructor.
+For instance, $\al\mathcal{EN}$ is the extension of $\al$ by full existential quantification and number restrictions. Especially, we have the following table(p167 of \cite{foundation})
+\[
+\begin{tabular}{ll}
+\hline
+OWL languages & underlying DL\\
+\hline
+OWL DL & $\mathcal{SHOIN}(D)$\\
+OWL Lite & $\mathcal{SHIF}(D)$\\
+OWL 2 DL & $\mathcal{SROIQ}(D)$\\
+OWL 2 EL & $\mathcal{EL}^{++}$\\
+OWL 2 RL & $\mathcal{DLP}$\\
+OWL 2 QL & DL-Lite
+\end{tabular}
+\]
+A translation from $\al$ to first order logic can be seen in Ch 2.2.1.3 of \cite{handbook}.
+
+
+\subsection{Inferences}
+This section is just a nutshell of ch 2.2.4 in \cite{handbook}.\newline
+Suppose $\tbox,\abox,\rbox$ are a TBox, ABox, RBox, respectively. For a knowledge base $\kb = \tbox \cup \abox \cup \rbox$ and a set of formulas $\Sigma$, if every model of $\kb$ is also a model of $\Sigma$, then we say $\kb$ \textbf{entails} $\Sigma$, denoted as $\kb \vDash \Sigma$; otherwise, it's denoted as $\kb \nvDash \Sigma$. If $\kb$ is empty, then it's simply denoted as $\vDash \Sigma$, meaning $\Sigma$ is true under any interpretation(so if no interpretation can satisfy $\Sigma$, then it's denoted as $\nvDash\Sigma$). Two formulas $\phi,\psi$ are said to be \textbf{semantically equivalent} iff $\phi \vDash \psi$ and $\psi\vDash \phi$, denoted as $\phi \Dashv \vDash \psi$.\newline
+
+The following are some common entailments:
+\begin{align*}
+C \sqsubseteq D &\Dashv\vDash (C \sqcap \neg D) \sqsubseteq \bot\\
+C \sqsubseteq D &\Dashv\vDash \neg D \sqsubseteq \neg C\\
+C \sqsubseteq D &\Dashv\vDash \top \sqsubseteq (\neg C \sqcup D)
+\end{align*}
+
+If a formula is true under any interpretation, then it is called valid or a tautology. The following are some common tautologies($C,D$ are concepts, $R$ is a role):
+\begin{align*}
+\neg \neg C &\equiv C\\
+\neg (C \sqcap D) & \equiv \neg C \sqcup \neg D\\
+\neg \forall R.C &\equiv \exists R. \neg C\\
+\neg \leqslant n R.C &\equiv\,\geqslant (n+1) R.C\,(n \in \mathbb{N})\\
+\neg \geqslant 0 R.C &\equiv \bot
+\end{align*}
+
+\subsubsection{Reasoning for concepts}
+Typical types of inferences for concepts in DL are the following:
+\begin{description}
+\item[Satisfiability] A concept $C$ is satisfiable or consistent w.r.t. $\tbox$ iff there exists a model $\deno$ of $\tbox$ such that $C^{\deno} \neq \varnothing$, and $\deno$ is called a model of $C$.
+\item[Subsumption] A concept $C$ is subsumed by a concept $D$ w.r.t. $\tbox$ iff $\tbox \vDash C \sqsubseteq D$.
+\item[Equivalence]  Two concepts $C$ and $D$ are equivalent w.r.t. $\tbox$ iff $\tbox \vDash C \equiv D$.
+\item[Disjointness]  Two concepts $C$ and $D$ are disjoint w.r.t. $\tbox$ iff $\tbox \vDash C \sqcap D \sqsubseteq \bot$.
+\end{description}
+
+The aforementioned inferencing tasks can be reduced to only subsumption in $\al$:
+\begin{pro}(Reduction to Subsumption)\newline
+Suppose $C$ and $D$ are two concepts, then the following statements hold w.r.t. $\tbox$:
+\begin{itemize}
+\item $C$ is unsatisfiable iff $C$ is subsumed by $\bot$; i.e. the unsatisfiability of $C$ expressed in DL is $\tbox \vDash C \sqsubseteq \bot$
+\item $C$ and $D$ are equivalent iff $C$ is subsumed by $D$ and $D$ is subsumed by $C$; i.e. $\tbox \vDash C \equiv D$ iff $\tbox \vDash C \sqsubseteq D$ and $\tbox \vDash D \sqsubseteq C$.
+\item $C$ and $D$ are disjoint iff $C \sqcap D$ is subsumed by $\bot$. 
+\end{itemize}
+\end{pro}
+
+In $\al\mathcal{C}$, with general negation, the other 3 inferencing tasks can be reduced to unsatisfiability:
+\begin{pro}(Reduction to Unsatisfiability)\newline
+Suppose $C$ and $D$ are two concepts. Then the following statements hold:
+\begin{itemize}
+\item $\tbox \vDash C \sqsubseteq D$ iff $\tbox\cup \{(C \sqcap \neg D)(a)\}$ is unsatisfiable, where $a$ is a new individual not occurring in $\kb$.
+\item $C$ and $D$ are equivalent iff both $(C \sqcap \neg D)$ and $(\neg C \sqcap D)$ are unsatisfiable; i.e. $\tbox \vDash C \equiv D$ iff $\tbox\vDash (C \sqcap \neg D)\sqsubseteq \bot $ and $\vDash (\neg C \sqcap D) \sqsubseteq \bot$.
+\item $C$ and $D$ are disjoint iff $C \sqcap D$ is unsatisfiable.
+\end{itemize}
+\end{pro}
+note the basic fact that $A \subseteq B$ iff $A \cap B^c =\varnothing$.	
+
+\subsubsection{Reasoning for assertions}
+After checking the satisfiability of the schema, it's time to depict the concrete situation. An ABox, denoted as $\abox$ in this section, is said to be \textbf{consistent} w.r.t $\tbox$ iff there is a model of $\abox$ and $\tbox$. $\abox$ is simply called consistent if it's consistent w.r.t. an empty TBox.\newline
+
+Obviously, for a concept $C$ and an individual $a$, $\abox \vDash C(a)$ iff $\abox \cup \{\neg C(a)\}$ is inconsistent. This is called \textbf{instance chekcing}.
+
+\subsection{Natural Deduction}
+It seems that the Gentzen deduction system is rarely used in description logics; still, such a deduction system for $\mathcal{ALC}$, an extension of $\al$, can be found in section 2.2.1.3 of \cite{proof}, and another can be found in \cite{rademaker2012proof}.\newline
+
+\section{OWL}
+Web ontology language now is developed to its second version, OWL 2.  Its proper subset, OWL, is indeed a semantic extension of RDF(just like RDFS). The sublanguages of OWL, OWL DL and OWL Lite, are also description logics $\mathcal{SHOIN}(D)$ and $\mathcal{SHIF}(D)$, respectively. They can be translated into RDF(see W3C's documentation \cite{OWL2RDF}).\newline 
+
+The introduction of $\mathcal{SROIQ}(D)$, the underlying DL of OWL 2 DL, can be found in section 3 of \cite{primer}.
+\bibliography{BDL}
+\bibliographystyle{ieeetr}
+
+\end{document}

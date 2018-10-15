@@ -1,1 +1,5 @@
-To typeset the tex file in this directory, please first download the lzl.sty, which contains my personal math operators and commands. 
+To typeset the tex file in this directory, please first download the lzl.sty, which contains my personal math operators and commands.
+
+rdf_formal_semantics: The formal semantics of RDF by viewing it as a formal language
+dl_intro: introduction to the basics of description logic, which is the underlying logic of the OWL2
+

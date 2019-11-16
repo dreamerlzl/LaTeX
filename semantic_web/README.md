@@ -7,3 +7,7 @@ Based on my own experience, it's suggested to start with the textbook 'Foundatio
 Personally speaking, I do not recommend the book 'A semantic web primer 3ed'. It's less formal and I find it more difficult to understand the concepts explained, which are introduced in a quite different way compared to the W3C's specifications and the book 'Foundations of semantic web technologies'.
 
 Another possible way to start with RDF may be the resources provided by the cambridge semantics company, where you can find some brief introductions and videos. 
+
+To find some use cases of the semantic web in the industry, see
+- [https://www.quora.com/What-popular-companies-work-with-Semantic-Web](https://www.quora.com/What-popular-companies-work-with-Semantic-Web)
+- [https://www.cambridgesemantics.com/blog/semantic-university/semantic-technologies-applied/example-semantic-web-applications/](https://www.cambridgesemantics.com/blog/semantic-university/semantic-technologies-applied/example-semantic-web-applications/)
